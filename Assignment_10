@@ -1,0 +1,31 @@
+import sqlite3
+
+def connect_to_database(db_file):
+    conn = sqlite3.connect(db_file)
+    return conn
+
+def query_person_and_pets(conn, person_id):
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM person WHERE id=?", (person_id,))
+    person = cursor.fetchone()
+    if person:
+        print(f"{person[1]} {person[2]}, {person[3]} years old")
+        cursor.execute("SELECT pet.* FROM pet JOIN person_pet ON pet.id = person_pet.pet_id WHERE person_pet.person_id=?", (person_id,))
+        pets = cursor.fetchall()
+        for pet in pets:
+            print(f"{person[1]} {person[2]} owned {pet[1]}, a {pet[2]}, that was {pet[3]} years old")
+    else:
+        print("Person not found")
+
+def main():
+    db_file = "pets.db"
+    conn = connect_to_database(db_file)
+    while True:
+        person_id = input("Enter person's ID number (or -1 to exit): ")
+        if person_id == "-1":
+            break
+        query_person_and_pets(conn, person_id)
+    conn.close()
+
+if __name__ == "__main__":
+    main()
